@@ -1,11 +1,11 @@
 import React from 'react'
-import { ContactProvider } from './ContactProvider';
-import { Routes } from "./Routes"
+import { ContactProvider } from './Contacts/ContactProvider';
+import { RootStack } from './RootStack';
 
 interface ProvidersProps {}
 
 export const Providers: React.FC<ProvidersProps> = ({}) => {
         return (<ContactProvider>
-            <Routes/>
+            <RootStack/>
         </ContactProvider>);
 }

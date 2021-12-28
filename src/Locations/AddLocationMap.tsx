@@ -4,18 +4,19 @@ import MapView, { Circle, Marker } from "react-native-maps"
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete"
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamList } from './ParamList';
-import { ContactSheet } from './ContactSheet';
+import { RootStackParamList } from '../ParamList';
+import { LocationSheet } from './LocationSheet';
 import { useContext, useEffect, useState } from 'react';
-import { SheetContext } from './SheetProvider';
+import { SheetContext } from './LocationProvider';
 
 interface MapProps {
-    navigation : NativeStackNavigationProp<ParamList, "Map">
-    route : RouteProp<ParamList, "Map">
+    navigation : NativeStackNavigationProp<RootStackParamList, "AddLocation">
+    route : RouteProp<RootStackParamList, "AddLocation">
 }
 
-export const Map: React.FC<MapProps> = ({navigation, route}) => {
-    const {inPContact, setInPContact, isSheetOpen, setSheetOpen} = useContext(SheetContext)
+export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
+    
+    const {inProgLocation, setInProgLocation, isSheetOpen, setSheetOpen} = useContext(SheetContext)
     const [ region, setRegion ] = useState({
 		latitude: route.params.coords?.latitude ?? 43.642567,
 		longitude: route.params.coords?.longitude ?? -79.387054,
@@ -45,6 +46,10 @@ export const Map: React.FC<MapProps> = ({navigation, route}) => {
                             latitude: details.geometry.location.lat,
                             longitude: details.geometry.location.lng
                         })
+                        setInProgLocation({ ...inProgLocation, 
+                            "Latitude" : details.geometry.location.lat, 
+                            "Longitude" :details.geometry.location.lng,
+                        })
                     }
 				}}
 				query={{
@@ -59,13 +64,13 @@ export const Map: React.FC<MapProps> = ({navigation, route}) => {
 					listView: { backgroundColor: "white" }
 				}}
 			/>
-            <ContactSheet/>
+            <LocationSheet/>
             <MapView style={styles.map} 
             initialRegion={region}
             region={region}
             rotateEnabled={false}
             onPress={(e) => {
-                setInPContact({ ...inPContact, 
+                setInProgLocation({ ...inProgLocation, 
                     "Latitude" : e.nativeEvent.coordinate.latitude, 
                     "Longitude" : e.nativeEvent.coordinate.longitude})
                 setSheetOpen(true)
@@ -75,13 +80,13 @@ export const Map: React.FC<MapProps> = ({navigation, route}) => {
             }}
             >
 				<Marker
-					coordinate={{latitude : inPContact.Latitude, longitude : inPContact.Longitude}}
+					coordinate={{latitude : inProgLocation.Latitude, longitude : inProgLocation.Longitude}}
 					pinColor="black"
 				>
 				</Marker>
 				<Circle center={
-                    {latitude : inPContact.Latitude, longitude : inPContact.Longitude}} 
-                    radius={inPContact.Radius} />
+                    {latitude : inProgLocation.Latitude, longitude : inProgLocation.Longitude}} 
+                    radius={inProgLocation.Radius} />
                 <Marker
 					coordinate={{
                         "latitude" : placesMarker.latitude,

@@ -1,16 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Button, Text, View } from 'react-native';
-import { Center } from './Center';
-import { ContactContext } from './ContactProvider';
+import { Center } from '../Center';
+import { ContactContext } from '../Contacts/ContactProvider';
 import { NativeStackNavigationProp} from '@react-navigation/native-stack';
 import * as Location from 'expo-location';
-import { ParamList } from './ParamList';
+import { HomeStackParamList } from '../ParamList';
 
 interface HomeProps {
-    navigation : NativeStackNavigationProp<ParamList, "Home">
+    navigation : NativeStackNavigationProp<HomeStackParamList, "Welcome">
 }
 
-export const Home: React.FC<HomeProps> = ({navigation}) => {
+export const Welcome: React.FC<HomeProps> = ({navigation}) => {
     const {contacts, appendContacts, removeContacts} = useContext(ContactContext)
 
     const [location, setLocation] = useState<Location.LocationObject>();
@@ -32,13 +32,7 @@ export const Home: React.FC<HomeProps> = ({navigation}) => {
     return (
         <Center>
 
-            <Text>I am the Home Screen</Text>
-            <Button
-                title='Add a Friend'
-                onPress={() => {
-                    navigation.navigate("Map", {coords : location?.coords}) 
-                }}
-                />
+            <Text>Welcome Sailesh :)</Text>
             {/* {contacts.size > 0 ? (
                 <Button
                 title='Remove a Friend'

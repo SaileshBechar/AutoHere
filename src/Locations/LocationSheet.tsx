@@ -2,16 +2,14 @@ import React, { useContext, useEffect, useState } from 'react'
 import { StyleSheet, Text, View, Button, useWindowDimensions, TouchableWithoutFeedback } from 'react-native';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { ContactContext } from './ContactProvider';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Feather';
-import { SheetContext } from './SheetProvider';
+import { SheetContext } from './LocationProvider';
 
-interface ContactSheetProps {}
+interface LocationSheetProps {}
 
-export const ContactSheet: React.FC<ContactSheetProps> = ({}) => {
-  const {inPContact, setInPContact, isSheetOpen, setSheetOpen} = useContext(SheetContext)
-  const {contacts, modifyContact} = useContext(ContactContext)
+export const LocationSheet: React.FC<LocationSheetProps> = ({}) => {
+  const {inProgLocation, setInProgLocation, isSheetOpen, setSheetOpen} = useContext(SheetContext)
   const [count, setCount] = useState(0);
 
   const dimensions = useWindowDimensions();
@@ -94,16 +92,16 @@ export const ContactSheet: React.FC<ContactSheetProps> = ({}) => {
               <Icon name="chevron-down" size={25}/>
             </View>
         </TouchableWithoutFeedback>
-        <Text style={{marginTop: 10}}>Radius: {inPContact.Radius.toFixed(1)} m</Text>
+        <Text style={{marginTop: 10}}>Radius: {inProgLocation.Radius.toFixed(1)} m</Text>
         <Slider
           style={{width: 400, height: 50, marginTop: 20}}
           minimumValue={5}
           maximumValue={1000}
           minimumTrackTintColor="#000000"
           maximumTrackTintColor="#000000"
-          value={inPContact.Radius}
+          value={inProgLocation.Radius}
           onValueChange={(val) => {
-            setInPContact({...inPContact, Radius : val})
+            setInProgLocation({...inProgLocation, Radius : val})
           }}
         />
         <TouchableWithoutFeedback
