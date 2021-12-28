@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Text, View, Button, useWindowDimensions } from 'react-native';
+import { StyleSheet, Text, View, Button, useWindowDimensions, TouchableWithoutFeedback } from 'react-native';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { ContactContext } from './ContactProvider';
 import Slider from '@react-native-community/slider';
+import Icon from 'react-native-vector-icons/Feather';
 import { SheetContext } from './SheetProvider';
 
 interface ContactSheetProps {}
@@ -25,7 +26,7 @@ export const ContactSheet: React.FC<ContactSheetProps> = ({}) => {
   useEffect(() => {
     if (isSheetOpen) {
       top.value = withSpring(
-        dimensions.height / 1.5,
+        dimensions.height / 1.4,
         SPRING_CONFIG
       )
     } else {
@@ -59,18 +60,6 @@ export const ContactSheet: React.FC<ContactSheetProps> = ({}) => {
     }
   });
   return (
-    <>
-    {/* <View>
-        <Button
-          title="Open Bottom Sheet"
-          onPress={() => {
-            top.value = withSpring(
-              dimensions.height / 5,
-              SPRING_CONFIG
-              )
-          }}
-        />
-    </View> */}
     <PanGestureHandler
       onGestureEvent={gestureHandler}>
       <Animated.View
@@ -91,30 +80,60 @@ export const ContactSheet: React.FC<ContactSheetProps> = ({}) => {
           shadowRadius: 3.84,
           elevation: 5,
           padding: 20, 
-          justifyContent: 'center',
           alignItems: 'center',
+          zIndex: 1
         },
       style]}
       >
-        <Button title='Close' onPress={() => {
-          setSheetOpen(false)
-        }}/>
-        <Text>Radius: {inPContact.Radius}</Text>
-          <Slider
-            style={{width: 400, height: 100}}
-            minimumValue={5}
-            maximumValue={1000}
-            minimumTrackTintColor="#000000"
-            maximumTrackTintColor="#000000"
-            value={inPContact.Radius}
-            onValueChange={(val) => {
-              const tempContact = inPContact 
-              tempContact['Radius'] = val
-              setInPContact(tempContact)
+        <TouchableWithoutFeedback
+            onPress={() => {
+              setSheetOpen(false)
             }}
-          />
+          >
+            <View style={styles.down_arrow}>
+              <Icon name="chevron-down" size={25}/>
+            </View>
+        </TouchableWithoutFeedback>
+        <Text style={{marginTop: 10}}>Radius: {inPContact.Radius.toFixed(1)} m</Text>
+        <Slider
+          style={{width: 400, height: 50, marginTop: 20}}
+          minimumValue={5}
+          maximumValue={1000}
+          minimumTrackTintColor="#000000"
+          maximumTrackTintColor="#000000"
+          value={inPContact.Radius}
+          onValueChange={(val) => {
+            setInPContact({...inPContact, Radius : val})
+          }}
+        />
+        <TouchableWithoutFeedback
+            onPress={() => {
+              setSheetOpen(false)
+            }}
+          >
+            <View style={styles.save_button}>
+              <Text>Save</Text>
+            </View>
+        </TouchableWithoutFeedback>
       </Animated.View>
     </PanGestureHandler>
-    </>
   );
 }
+  
+const styles = StyleSheet.create({
+  down_arrow: {
+    alignItems: "center",
+    padding: 10,
+    zIndex: 1,
+    position: 'absolute',
+    top: 5,
+    left: 10
+  },
+  save_button : {
+    alignItems: "center",
+    backgroundColor: "#DDDDDD",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5
+  }
+});

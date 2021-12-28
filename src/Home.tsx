@@ -39,7 +39,6 @@ export const Home: React.FC<HomeProps> = ({navigation}) => {
                     navigation.navigate("Map", {coords : location?.coords}) 
                 }}
                 />
-            {/* <ReanimatedSheet/> */}
             {/* {contacts.size > 0 ? (
                 <Button
                 title='Remove a Friend'

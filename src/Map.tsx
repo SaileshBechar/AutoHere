@@ -6,7 +6,7 @@ import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamList } from './ParamList';
 import { ContactSheet } from './ContactSheet';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { SheetContext } from './SheetProvider';
 
 interface MapProps {
@@ -19,9 +19,13 @@ export const Map: React.FC<MapProps> = ({navigation, route}) => {
     const [ region, setRegion ] = useState({
 		latitude: route.params.coords?.latitude ?? 43.642567,
 		longitude: route.params.coords?.longitude ?? -79.387054,
-		latitudeDelta: 0.0922,
-		longitudeDelta: 0.0421
+		latitudeDelta: 0.0371,
+		longitudeDelta: 0.0307
 	})
+    const [placesMarker, setPlacesMarker] = useState({
+        latitude: route.params.coords?.latitude ?? 43.642567,
+		longitude: route.params.coords?.longitude ?? -79.387054
+    })
     return (
         <View>
             <GooglePlacesAutocomplete
@@ -33,11 +37,13 @@ export const Map: React.FC<MapProps> = ({navigation, route}) => {
 				onPress={(data, details = null) => {
 					// 'details' is provided when fetchDetails = true
                     if (details) {
-                        setRegion({
+                        setRegion({ ...region,
                             latitude: details.geometry.location.lat,
-                            longitude: details.geometry.location.lng,
-                            latitudeDelta: 0.0922,
-                            longitudeDelta: 0.0421
+                            longitude: details.geometry.location.lng
+                        })
+                        setPlacesMarker({
+                            latitude: details.geometry.location.lat,
+                            longitude: details.geometry.location.lng
                         })
                     }
 				}}
@@ -57,11 +63,15 @@ export const Map: React.FC<MapProps> = ({navigation, route}) => {
             <MapView style={styles.map} 
             initialRegion={region}
             region={region}
+            rotateEnabled={false}
             onPress={(e) => {
-                inPContact["Latitude"] = e.nativeEvent.coordinate.latitude
-                inPContact["Longitude"] = e.nativeEvent.coordinate.longitude
-                setInPContact(inPContact)
-                setSheetOpen(!isSheetOpen)
+                setInPContact({ ...inPContact, 
+                    "Latitude" : e.nativeEvent.coordinate.latitude, 
+                    "Longitude" : e.nativeEvent.coordinate.longitude})
+                setSheetOpen(true)
+            }}
+            onRegionChangeComplete={(r) => {
+                setRegion(r)
             }}
             >
 				<Marker
@@ -74,8 +84,8 @@ export const Map: React.FC<MapProps> = ({navigation, route}) => {
                     radius={inPContact.Radius} />
                 <Marker
 					coordinate={{
-                        "latitude" : region.latitude,
-                        "longitude" : region.longitude
+                        "latitude" : placesMarker.latitude,
+                        "longitude" : placesMarker.longitude
                     }}
 				>
 				</Marker>
