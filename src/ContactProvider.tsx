@@ -1,19 +1,20 @@
 import React, { useState } from 'react'
-import { AsyncStorage } from 'react-native';
 
 export const ContactContext = React.createContext<{
     contacts : { [name: string]: Contact};
     appendContacts: (contactName : string, contact : Contact) => void;
     removeContacts: () => void;
     modifyContact : <K extends keyof Contact>(contactName : string, key : K, value : Contact[K]) => void;
+    setContacts : (contacts : { [name: string]: Contact}) => void;
     }>({
         contacts : {},
         appendContacts : () => {},
         removeContacts : () => {},
-        modifyContact : () => {}
+        modifyContact : () => {},
+        setContacts : () => {}
     })
 
- interface Contact {
+export interface Contact {
     Id : string;
     PhoneNumber : number;
     Longitude : number;
@@ -46,13 +47,14 @@ export const ContactProvider: React.FC<ContactProviderProps> = ({children}) => {
                 // AsyncStorage.setItem("contacts", JSON.stringify(fakeContact))
             },
             removeContacts : async () => {
-                AsyncStorage.removeItem("contacts")
+                // AsyncStorage.removeItem("contacts")
             },
             modifyContact : <K extends keyof Contact>(contactName : string, key : K, value : Contact[K]) => {
                 let contacts_copy = contacts
                 contacts_copy![contactName]![key] = value
                 setContacts(contacts_copy)
-            }
+            },
+            setContacts,
         }}>{children}</ContactContext.Provider>
     );
 }

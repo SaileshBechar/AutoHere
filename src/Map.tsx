@@ -6,8 +6,8 @@ import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamList } from './ParamList';
 import { ContactSheet } from './ContactSheet';
-import { useContext } from 'react';
-import { ContactContext } from './ContactProvider';
+import { useContext, useState } from 'react';
+import { SheetContext } from './SheetProvider';
 
 interface MapProps {
     navigation : NativeStackNavigationProp<ParamList, "Map">
@@ -15,13 +15,13 @@ interface MapProps {
 }
 
 export const Map: React.FC<MapProps> = ({navigation, route}) => {
-    const [ region, setRegion ] = React.useState({
+    const {inPContact, setInPContact, isSheetOpen, setSheetOpen} = useContext(SheetContext)
+    const [ region, setRegion ] = useState({
 		latitude: route.params.coords?.latitude ?? 43.642567,
 		longitude: route.params.coords?.longitude ?? -79.387054,
 		latitudeDelta: 0.0922,
 		longitudeDelta: 0.0421
 	})
-    const {contacts, modifyContact} = useContext(ContactContext)
     return (
         <View>
             <GooglePlacesAutocomplete
@@ -58,20 +58,20 @@ export const Map: React.FC<MapProps> = ({navigation, route}) => {
             initialRegion={region}
             region={region}
             onPress={(e) => {
-                console.log("before", contacts)
-                modifyContact("InProgress", "Latitude", e.nativeEvent.coordinate.latitude)
-                modifyContact("InProgress", "Longitude", e.nativeEvent.coordinate.longitude)
-                console.log("after", contacts)
+                inPContact["Latitude"] = e.nativeEvent.coordinate.latitude
+                inPContact["Longitude"] = e.nativeEvent.coordinate.longitude
+                setInPContact(inPContact)
+                setSheetOpen(!isSheetOpen)
             }}
             >
 				<Marker
-					coordinate={{latitude : contacts['InProgress']!.Latitude, longitude : contacts['InProgress']!.Longitude}}
+					coordinate={{latitude : inPContact.Latitude, longitude : inPContact.Longitude}}
 					pinColor="black"
 				>
 				</Marker>
 				<Circle center={
-                    {latitude : contacts['InProgress']!.Latitude, longitude : contacts['InProgress']!.Longitude}} 
-                    radius={contacts['InProgress']!.Radius} />
+                    {latitude : inPContact.Latitude, longitude : inPContact.Longitude}} 
+                    radius={inPContact.Radius} />
                 <Marker
 					coordinate={{
                         "latitude" : region.latitude,

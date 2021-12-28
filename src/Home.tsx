@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Button, Text } from 'react-native';
+import { Button, Text, View } from 'react-native';
 import { Center } from './Center';
 import { ContactContext } from './ContactProvider';
 import { NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -31,23 +31,26 @@ export const Home: React.FC<HomeProps> = ({navigation}) => {
       
     return (
         <Center>
+
             <Text>I am the Home Screen</Text>
             <Button
                 title='Add a Friend'
                 onPress={() => {
-                navigation.navigate("Map", {coords : location?.coords}) // TODO: add current location as parameter
+                    navigation.navigate("Map", {coords : location?.coords}) 
                 }}
-            />
+                />
+            {/* <ReanimatedSheet/> */}
             {/* {contacts.size > 0 ? (
                 <Button
                 title='Remove a Friend'
                 onPress={() => {
-                navigation.navigate("Map")
+                    navigation.navigate("Map")
                 }}
-            />
-            ) : 
+                />
+                ) : 
                 null
             } */}
+        
         </Center>
     );
 }
