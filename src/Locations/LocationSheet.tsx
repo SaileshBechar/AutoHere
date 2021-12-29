@@ -1,17 +1,24 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { StyleSheet, Text, View, Button, useWindowDimensions, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, Text, View, Button, useWindowDimensions, TouchableWithoutFeedback, ScrollView, TextInput} from 'react-native';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import Slider from '@react-native-community/slider';
-import Icon from 'react-native-vector-icons/Feather';
-import { SheetContext } from './LocationProvider';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { LocationContext } from './LocationProvider';
+import { RootStackParamList } from '../ParamList';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-interface LocationSheetProps {}
+interface LocationSheetProps {
+  navigation : NativeStackNavigationProp<RootStackParamList, "AddLocation">
+}
 
-export const LocationSheet: React.FC<LocationSheetProps> = ({}) => {
-  const {inProgLocation, setInProgLocation, isSheetOpen, setSheetOpen} = useContext(SheetContext)
-  const [count, setCount] = useState(0);
+export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
+  const {inProgLocation, setInProgLocation, isSheetOpen, setSheetOpen, locationArray, setLocationArray} = useContext(LocationContext)
+  const [isSheetFullExpanded, setSheetFullExpanded] = useState(false);
+  const [locationName, onChangeName] = React.useState("");
 
+  const SHEET_FULL_EXPANDED = 5
+  const SHEET_PEEKING = 1.4
   const dimensions = useWindowDimensions();
   const SPRING_CONFIG =  {
     damping: 80,
@@ -21,10 +28,11 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({}) => {
     stiffness: 500
   }
   const top = useSharedValue( dimensions.height )
+
   useEffect(() => {
     if (isSheetOpen) {
       top.value = withSpring(
-        dimensions.height / 1.4,
+        dimensions.height / SHEET_PEEKING,
         SPRING_CONFIG
       )
     } else {
@@ -34,6 +42,46 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({}) => {
       )
     }
   }, [isSheetOpen])
+  useEffect(() => {
+    setInProgLocation({...inProgLocation, Name : locationName})
+  }, [locationName])
+
+  const handleSheetFullExpanded = () => {
+    if (isSheetFullExpanded) {
+      top.value = withSpring(
+        dimensions.height / SHEET_PEEKING,
+        SPRING_CONFIG
+        )
+    }
+    else {
+      top.value = withSpring(
+        dimensions.height / SHEET_FULL_EXPANDED,
+        SPRING_CONFIG
+        )
+    }
+  }
+
+  const ExpandIcon = () => {
+    const icon_name = isSheetFullExpanded ? "arrow-down-drop-circle-outline" : "arrow-up-drop-circle-outline"
+    return <Icon name={icon_name} size={50}/>
+  }
+
+  const SaveButton = () => {
+    
+    return locationName.length > 1 && isSheetFullExpanded? (
+      <TouchableWithoutFeedback
+            onPress={() => {
+              setLocationArray([...locationArray, inProgLocation])
+              navigation.goBack()
+            }}
+          >
+          <View style={styles.save_button}>
+            <Text style={{fontSize: 20}}>SAVE</Text>
+          </View>
+      </TouchableWithoutFeedback>
+    ) : null
+  }
+
   const style = useAnimatedStyle(() => {
     return {
       top : withSpring(top.value, SPRING_CONFIG)
@@ -41,12 +89,10 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({}) => {
   });
   const gestureHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
     onStart(_, context : any) { 
-      setCount(count + 1)
       context.startTop = top.value
     },
     onActive(event, context : any) {
       console.log(event)
-      setCount(count + 1)
       top.value = context.startTop + event.translationY;
     },
     onEnd() {
@@ -57,6 +103,7 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({}) => {
       }
     }
   });
+
   return (
     <PanGestureHandler
       onGestureEvent={gestureHandler}>
@@ -66,7 +113,7 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({}) => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'white',
+          backgroundColor: '#EBEBEB',
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
           shadowColor: '#000',
@@ -104,15 +151,26 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({}) => {
             setInProgLocation({...inProgLocation, Radius : val})
           }}
         />
+        {isSheetFullExpanded ? (
+          <TextInput
+            style={styles.input}
+            onChangeText={onChangeName}
+            value={locationName}
+            placeholder="Enter a Location Name"
+            maxLength={20}
+          />
+        ): null}
+        <SaveButton/>
         <TouchableWithoutFeedback
-            onPress={() => {
-              setSheetOpen(false)
-            }}
-          >
-            <View style={styles.save_button}>
-              <Text>Save</Text>
-            </View>
+              onPress={() => {
+                handleSheetFullExpanded()
+                setSheetFullExpanded(!isSheetFullExpanded)
+              }}>
+              <View>
+                <ExpandIcon/>
+              </View>
         </TouchableWithoutFeedback>
+        
       </Animated.View>
     </PanGestureHandler>
   );
@@ -127,11 +185,22 @@ const styles = StyleSheet.create({
     top: 5,
     left: 10
   },
+  input: {
+    height: 40,
+    width: 250,
+    margin: 12,
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+  },
   save_button : {
     alignItems: "center",
-    backgroundColor: "#DDDDDD",
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5
-  }
+    paddingHorizontal: 50,
+    borderRadius: 100,
+    backgroundColor: "#A9AFD1",
+    marginTop: 10,
+    marginBottom: 30,
+    fontSize: 30
+  },
 });

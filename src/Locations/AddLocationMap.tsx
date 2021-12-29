@@ -6,8 +6,8 @@ import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../ParamList';
 import { LocationSheet } from './LocationSheet';
-import { useContext, useEffect, useState } from 'react';
-import { SheetContext } from './LocationProvider';
+import { useContext, useState } from 'react';
+import { LocationContext } from './LocationProvider';
 
 interface MapProps {
     navigation : NativeStackNavigationProp<RootStackParamList, "AddLocation">
@@ -16,7 +16,7 @@ interface MapProps {
 
 export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
     
-    const {inProgLocation, setInProgLocation, isSheetOpen, setSheetOpen} = useContext(SheetContext)
+    const {inProgLocation, setInProgLocation, setSheetOpen} = useContext(LocationContext)
     const [ region, setRegion ] = useState({
 		latitude: route.params.coords?.latitude ?? 43.642567,
 		longitude: route.params.coords?.longitude ?? -79.387054,
@@ -64,7 +64,7 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
 					listView: { backgroundColor: "white" }
 				}}
 			/>
-            <LocationSheet/>
+            <LocationSheet navigation={navigation}/>
             <MapView style={styles.map} 
             initialRegion={region}
             region={region}

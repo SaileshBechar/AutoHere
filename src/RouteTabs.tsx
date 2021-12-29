@@ -17,7 +17,7 @@ export const RouteTabs: React.FC<RoutesProps> = ({}) => {
     screenOptions={({ route }) => ({
       tabBarIcon: ({ focused, color, size }) => {
         let iconName = "";
-        color = focused ? "#a9afd1" : "#ada9b7"
+        color = focused ? "#a9afd1" : "#ebebeb"
 
         if (route.name === "Home") {
           iconName = focused ? "home" : "home-outline";
