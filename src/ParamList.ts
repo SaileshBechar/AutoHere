@@ -17,7 +17,8 @@ export type TabsParamList = {
 
 export type ContactStackParamList = {
     ListContacts : undefined;
-    AddContact : undefined;
+    CreateContact : undefined;
+    ImportContacts : undefined;
 }
 
 export type LocationStackParamList = {
