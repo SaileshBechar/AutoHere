@@ -15,7 +15,6 @@ interface MapProps {
 }
 
 export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
-    
     const {inProgLocation, setInProgLocation, setSheetOpen} = useContext(LocationContext)
     const [ region, setRegion ] = useState({
 		latitude: route.params.coords?.latitude ?? 43.642567,

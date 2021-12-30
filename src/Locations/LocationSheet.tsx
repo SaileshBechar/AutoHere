@@ -4,7 +4,7 @@ import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-g
 import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { LocationContext } from './LocationProvider';
+import { LocationContext, Location } from './LocationProvider';
 import { RootStackParamList } from '../ParamList';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -13,9 +13,10 @@ interface LocationSheetProps {
 }
 
 export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
-  const {inProgLocation, setInProgLocation, isSheetOpen, setSheetOpen, locationArray, setLocationArray} = useContext(LocationContext)
+  const {inProgLocation, setInProgLocation, isSheetOpen, setSheetOpen, getLocations, saveLocations} = useContext(LocationContext)
   const [isSheetFullExpanded, setSheetFullExpanded] = useState(false);
-  const [locationName, onChangeName] = React.useState("");
+  const [locationArray, setLocationArray] = useState<Location[]>([]);
+  const [locationName, onChangeName] = useState("");
 
   const SHEET_FULL_EXPANDED = 5
   const SHEET_PEEKING = 1.4
@@ -44,6 +45,7 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
   }, [isSheetOpen])
   useEffect(() => {
     setInProgLocation({...inProgLocation, Name : locationName})
+    getLocations().then((items : Location[]) => setLocationArray(items))
   }, [locationName])
 
   const handleSheetFullExpanded = () => {
@@ -71,7 +73,7 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
     return locationName.length > 1 && isSheetFullExpanded? (
       <TouchableWithoutFeedback
             onPress={() => {
-              setLocationArray([...locationArray, inProgLocation])
+              saveLocations([...locationArray, inProgLocation])
               navigation.goBack()
             }}
           >

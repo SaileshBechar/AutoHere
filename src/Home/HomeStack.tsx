@@ -3,7 +3,6 @@ import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-na
 import React from 'react'
 import { Welcome } from './Welcome';
 import { HomeStackParamList, TabsParamList } from '../ParamList';
-import { StartTrip } from '../Trips/StartTrip';
 
 interface HomeStackProps {
     // navigation : NativeStackNavigationProp<TabsParamList, "Home">
@@ -18,7 +17,6 @@ export const HomeStack: React.FC<HomeStackProps> = ({}) => {
                 // <TripProvider>
                 <Stack.Navigator>
                     <Stack.Screen name="Welcome" options={{header : () => null}} component={Welcome} />
-                    <Stack.Screen name="StartTrip" options={{header : () => null}} component={StartTrip} />
                 </Stack.Navigator>
                 // {/* </TripProvider>); */}
         );

@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react'
 import * as Contacts from 'expo-contacts';
 import { View, Text, FlatList, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import { Contact, ContactContext } from './ContactProvider';
-import { Center } from '../Center';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ContactStackParamList } from '../ParamList';
 
@@ -11,8 +10,9 @@ interface ImportContactsProps {
 }
 
 export const ImportContacts: React.FC<ImportContactsProps> = ({navigation}) => {
-    const {contacts, setContacts} = useContext(ContactContext)
+    const {getContacts, saveContacts} = useContext(ContactContext)
     const [importedContacts, setImportedContacts] = useState<Contact[]>([])
+    const [currContacts, setCurrContacts] = useState<Contact[]>([])
 
     function ensure<T>(argument: T | undefined | null, message: string = 'This value was promised to be there.'): T {
         if (argument === undefined || argument === null) {
@@ -30,35 +30,39 @@ export const ImportContacts: React.FC<ImportContactsProps> = ({navigation}) => {
             });
     
             if (data.length > 0) {
-              for (let i = 0; i < 10; i++) {
-                  const numPhoneNumbers = data[i].phoneNumbers?.length ?? 0
-                  for (let j = 0; j < numPhoneNumbers; j++) {
+                const tempContactArray : Contact[] = []
+                for (let i = 0; i < data.length; i++) {
+                    const numPhoneNumbers = data[i].phoneNumbers?.length ?? 0
+                    for (let j = 0; j < numPhoneNumbers; j++) {
                         const phoneNumberObject = ensure<Contacts.PhoneNumber[]>(data[i].phoneNumbers)[j]
                         const phoneNumberString = ensure<string>(phoneNumberObject.number)
 
-                        const tempContact : Contact = {
+                        tempContactArray.push({
                             Id : data[i].id + phoneNumberObject.id,
-                            Name : data[i].name + " " + phoneNumberString,
+                            Name : data[i].name,
+                            Label: phoneNumberObject.label,
                             PhoneNumber : phoneNumberString
-                        }
-                        setImportedContacts([...importedContacts, tempContact])
-
-                  }
-              }
+                        })
+                        
+                    }
+                }
+              setImportedContacts([...importedContacts, ...tempContactArray])
             }
           }
         })();
+        getContacts().then(items => setCurrContacts(items))
     }, []);
 
     const renderContacts = (item : Contact) => {
         return(
             <TouchableWithoutFeedback
             onPress={() => {
-                setContacts([...contacts, item])
+                saveContacts([...currContacts, item])
                 navigation.navigate("ListContacts")
             }}>
                 <View style={styles.contact}>
                     <Text>{item.Name}</Text>
+                    <Text>{item.Label} {item.PhoneNumber}</Text>
                 </View>
             </TouchableWithoutFeedback>
         )

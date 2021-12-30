@@ -27,10 +27,9 @@ export type LocationStackParamList = {
 
 export type HomeStackParamList = {
     Welcome: undefined;
-    StartTrip: undefined;
 }
 
 export type TripStackParamList = {
     ListTrips: undefined;
-    StartTrip: undefined;
+    CreateTrip : undefined;
 }

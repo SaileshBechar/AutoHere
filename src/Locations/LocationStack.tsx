@@ -11,10 +11,11 @@ interface LocationStackProps {
 
 
 export const LocationStack: React.FC<LocationStackProps> = ({navigation}) => {
-    const {locationArray} = useContext(LocationContext)
+    const {getLocations} = useContext(LocationContext)
+    const [locationArray, setLocationArray] = useState<Location[]>([]);
+
     const [location, setLocation] = useState<ExpoLocation.LocationObject>();
     const [errorMsg, setErrorMsg] = useState("");
-    const dimensions = useWindowDimensions();
     
     useEffect(() => {
         (async () => {
@@ -29,6 +30,10 @@ export const LocationStack: React.FC<LocationStackProps> = ({navigation}) => {
         })();
     }, []);
     
+    useEffect(() => {
+        getLocations().then(items => setLocationArray(items))
+    }, [])
+
     return (
         <View style={styles.container}>
             <TouchableWithoutFeedback
@@ -64,7 +69,7 @@ const styles = StyleSheet.create({
   },
   location : { 
       backgroundColor: '#a9afd1', 
-      height: 100,
+      height: 60,
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: 10,

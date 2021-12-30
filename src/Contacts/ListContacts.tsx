@@ -12,8 +12,13 @@ interface ListContactsProps {
 
 
 export const ListContacts: React.FC<ListContactsProps> = ({navigation}) => {
-  const {contacts, setContacts} = useContext(ContactContext)
-  
+  const {getContacts} = useContext(ContactContext)
+  const [currContacts, setCurrContacts] = useState<Contact[]>([])
+
+  useEffect(() => {
+      getContacts().then(items => setCurrContacts(items))
+  }, [])
+
     return (
       <View style={styles.container}>
           <TouchableWithoutFeedback
@@ -21,12 +26,12 @@ export const ListContacts: React.FC<ListContactsProps> = ({navigation}) => {
               navigation.navigate("CreateContact") 
           }}>
               <View style={styles.contactButton}>
-                  <Text style={{fontSize: 20}}>Create a Contact</Text>
+                  <Text style={{fontSize: 20}}>Create Contact</Text>
               </View>
           </TouchableWithoutFeedback>
-          {contacts.length > 0 ? 
+          {currContacts.length > 0 ? 
             <FlatList
-                data={contacts}
+                data={currContacts}
                 renderItem={({ item, index, separators }) => (
                   <View style={styles.contact}>
                         <Text>{item.Name}</Text>
@@ -54,7 +59,7 @@ const styles = StyleSheet.create({
   },
   contact : { 
       backgroundColor: '#a9afd1', 
-      height: 100,
+      height: 60,
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: 10,

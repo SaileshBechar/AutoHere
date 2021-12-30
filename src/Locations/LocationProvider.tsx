@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface Location {
     Name : string;
@@ -19,15 +20,15 @@ export const LocationContext = React.createContext<{
     setInProgLocation : (location : Location) => void;
     isSheetOpen : boolean;
     setSheetOpen : (value : boolean) => void;
-    locationArray : Location[];
-    setLocationArray: (locationDict : Location[]) => void;
+    getLocations : () => Promise<Location[]>
+    saveLocations : (locations : Location[]) => Promise<void>;
     }>({
         inProgLocation : _createDefaultLocation(),
         setInProgLocation : () => {},
         isSheetOpen : false,
         setSheetOpen : () => {},
-        locationArray : [],
-        setLocationArray : () => {}
+        getLocations : async () => [],
+        saveLocations : async () => {}
     })
 
 
@@ -36,7 +37,6 @@ interface LocationProviderProps {}
 export const LocationProvider: React.FC<LocationProviderProps> = ({children}) => {
     const [inProgLocation, setInProgLocation] = useState<Location>(_createDefaultLocation())
     const [isSheetOpen, setSheetOpen ] = useState(false)
-    const [locationArray, setLocationArray] = useState<Location[]>([])
 
     return (
         <LocationContext.Provider value={{
@@ -44,8 +44,24 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({children}) =>
             setInProgLocation,
             isSheetOpen,
             setSheetOpen,
-            locationArray,
-            setLocationArray
+            getLocations : async () => {
+                try {
+                    const jsonLocations = await AsyncStorage.getItem('Locations')
+                    return jsonLocations !== null ? JSON.parse(jsonLocations) as Location[] : [];
+                  } catch(e) {
+                    // error reading value
+                    console.log("Error reading locations")
+                    return []
+                  }
+            }, 
+            saveLocations : async (locations : Location[]) => {
+                try {
+                    const jsonLocations = JSON.stringify(locations)
+                    await AsyncStorage.setItem('Locations', jsonLocations)
+                } catch(e) {
+                    console.log("Error saving locations")
+                }
+            },
         }}>{children}</LocationContext.Provider>
     );
 }
