@@ -1,23 +1,23 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useContext, useEffect, useState } from 'react'
 import { View, Text, TouchableWithoutFeedback, StyleSheet, FlatList } from 'react-native';
-import { TripStackParamList } from '../ParamList';
+import { RootStackParamList, TripStackParamList } from '../ParamList';
 import { TripContext, Trip } from './TripProvider';
 
 interface ListTripsProps {
-    navigation : NativeStackNavigationProp<TripStackParamList, "ListTrips">
+    navigation : any
 }
 
 export const ListTrips: React.FC<ListTripsProps> = ({navigation}) => {
-    const {getTrips, saveTrips, inProgTrip} = useContext(TripContext)
-    const [tripArray, setTripArray] = useState<Trip[]>([]);
-    useEffect(() => {
-        saveTrips([])
-    }, [])
+    const {getTrips, saveTrips, tripArray, setTripArray, inProgTrip} = useContext(TripContext)
+    
     useEffect(() => {
         getTrips().then(items => setTripArray(items))
+        console.log("Init array", tripArray)
+    }, [])
+    useEffect(() => { 
         console.log("rendered", tripArray)
-    }, [inProgTrip])
+    }, [tripArray])
         return (
             <View style={styles.container}>
             <TouchableWithoutFeedback
@@ -33,9 +33,16 @@ export const ListTrips: React.FC<ListTripsProps> = ({navigation}) => {
             <FlatList
                 data={tripArray}
                 renderItem={({ item, index, separators }) => (
-                    <View style={styles.trip}>
-                        <Text>{item.Name}</Text>
-                    </View>
+                    <TouchableWithoutFeedback
+                        onPress={() => {
+                            navigation.navigate("StartTrip", {trip : item}) 
+                        }}
+                    >
+                        <View style={styles.trip}>
+                            <Text>{item.Name}</Text>
+                        </View>
+                    </TouchableWithoutFeedback>
+                    
                 )}
                 keyExtractor={(item : Trip) => item.Name}
             /> : null}

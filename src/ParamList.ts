@@ -1,11 +1,14 @@
 import * as Location from 'expo-location';
+import { Trip } from './Trips/TripProvider';
 
 export type RootStackParamList = {
     RouteTabs : undefined;
     AddLocation: {
         "coords" : Location.LocationObject["coords"] | undefined
     };
-    // StartTrip
+    StartTrip : {
+        "trip" : Trip
+    }
 }
 
 export type TabsParamList = {
@@ -34,4 +37,7 @@ export type TripStackParamList = {
     CreateTrip : undefined;
     AddContactsToTrip : undefined; 
     AddLocationToTrip : undefined; 
+    StartTrip : {
+        "trip" : Trip
+    }
 }

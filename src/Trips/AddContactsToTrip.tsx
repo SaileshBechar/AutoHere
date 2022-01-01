@@ -16,7 +16,7 @@ export const AddContactsToTrip: React.FC<AddContactToTripProps> = ({navigation})
 
     useEffect(() => {
         getContacts().then((items) => setContactsArray(items))
-    }, [ saveContacts])
+    }, [])
 
     return (
         <View style={styles.container}>

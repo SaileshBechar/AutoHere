@@ -17,7 +17,7 @@ export const AddLocationToTrip: React.FC<AddLocationToTripProps> = ({navigation}
 
     useEffect(() => {
         getLocations().then(items => setLocationArray(items))
-    }, [saveLocations])
+    }, [])
 
     return (
         <View style={styles.container}>

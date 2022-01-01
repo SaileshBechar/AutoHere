@@ -6,11 +6,15 @@ import { Location, _createDefaultLocation } from '../Locations/LocationProvider'
 export const TripContext = createContext<{
     inProgTrip : Trip;
     setInProgTrip : (trip : Trip) => void;
+    tripArray : Trip[]
+    setTripArray : (trip : Trip[]) => void
     getTrips : () => Promise<Trip[]>;
     saveTrips : (trips : Trip[]) => Promise<void>;
     }>({
         inProgTrip : {Name : "", Stops : []},
         setInProgTrip : () => {},
+        tripArray : [], 
+        setTripArray : () => {},
         getTrips : async () => [],
         saveTrips : async () => {}
     })
@@ -29,11 +33,14 @@ interface TripProviderProps {}
 
 export const TripProvider: React.FC<TripProviderProps> = ({children}) => {
     const [inProgTrip, setInProgTrip] = useState<Trip>({Name : "", Stops : [{Contacts : [], Location: _createDefaultLocation()}]})
+    const [tripArray, setTripArray] = useState<Trip[]>([]);
 
     return (
         <TripContext.Provider value={{
             inProgTrip,
             setInProgTrip,
+            tripArray, 
+            setTripArray,
             getTrips : async () => {
                 try {
                     const jsonTrips = await AsyncStorage.getItem('Trips')

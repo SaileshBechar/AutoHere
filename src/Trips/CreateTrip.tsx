@@ -11,14 +11,19 @@ interface CreateTripProps {
 }
 
 export const CreateTrip: React.FC<CreateTripProps> = ({navigation}) => {
-    const {inProgTrip, setInProgTrip, getTrips, saveTrips} = useContext(TripContext)
+    const {inProgTrip, setInProgTrip, tripArray, setTripArray, getTrips, saveTrips} = useContext(TripContext)
     
-    const [tripArray, setTripArray] = useState<Trip[]>([]);
     const [tripName, setTripName] = useState<string>("")
 
     useEffect(() => {
-        getTrips().then(items => setTripArray(items))
-        console.log(tripArray, inProgTrip)
+        getTrips().then(items => {
+            // console.log("CT init", items)
+            setTripArray(items)
+        })
+    }, [])
+
+    useEffect(() => {
+        console.log("InProgTrip", inProgTrip)
     }, [inProgTrip])
 
     return (
@@ -27,8 +32,13 @@ export const CreateTrip: React.FC<CreateTripProps> = ({navigation}) => {
                 { inProgTrip.Stops[0].Contacts.length > 0 ? (
                     <View style={{}}>
                          {
-                            Object.entries(inProgTrip.Stops[0].Contacts).map(([key, val]) => 
-                                <Text key={val.Id}>{val.Name}</Text>
+                            Object.entries(inProgTrip.Stops[0].Contacts).map(([key, val]) =>   
+                                <TouchableWithoutFeedback
+                                    onPress={() => navigation.navigate("AddContactsToTrip")}>
+                                    <View style={styles.addButton}>
+                                        <Text key={val.Id}>{val.Name}</Text>
+                                    </View>
+                                </TouchableWithoutFeedback>
                             )
                         }
                     </View>
@@ -50,8 +60,13 @@ export const CreateTrip: React.FC<CreateTripProps> = ({navigation}) => {
                         />
                     </View>
                 { inProgTrip.Stops[0].Location.Name !== "" ? (
-                    <View style={{}}>
-                        <Text>{inProgTrip.Stops[0].Location.Name}</Text>
+                    <View style={{}}> 
+                        <TouchableWithoutFeedback
+                            onPress={() => navigation.navigate("AddLocationToTrip")}>
+                            <View style={styles.addButton}>
+                                <Text>{inProgTrip.Stops[0].Location.Name}</Text>
+                            </View>
+                        </TouchableWithoutFeedback>
                     </View>
                 ) : (
                     <TouchableWithoutFeedback
@@ -66,8 +81,10 @@ export const CreateTrip: React.FC<CreateTripProps> = ({navigation}) => {
                     tripName.length > 1 ? (
                         <TouchableWithoutFeedback
                                 onPress={() => {
+                                setTripArray([...tripArray, {Name : tripName, Stops : inProgTrip.Stops}])
                                 saveTrips([...tripArray, {Name : tripName, Stops : inProgTrip.Stops}])
-                                navigation.goBack()
+                                setInProgTrip({Name: "", Stops : [{Contacts: [], Location: _createDefaultLocation()}]})
+                                navigation.navigate("ListTrips")
                                 }}
                             >
                             <View style={styles.saveButton}>
@@ -85,7 +102,7 @@ const styles = StyleSheet.create({
     container : {
         alignItems: "center",
         justifyContent: "center",
-        // flex:1,
+        flex:1,
         paddingTop: 50
     },
     tripContainer : {
@@ -105,7 +122,8 @@ const styles = StyleSheet.create({
     },
     input: {
         height: 40,
-        width: 100,
+        // width: 100,
+        flex : 1,
         marginHorizontal: 10,
         borderWidth: 1,
         borderRadius: 5,
@@ -114,8 +132,9 @@ const styles = StyleSheet.create({
     addButton : {
         alignItems: "center",
         paddingVertical: 10,
-        paddingHorizontal: 50,
-        borderRadius: 100,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        marginHorizontal: 20,
         backgroundColor: "#EBEBEB",
     },
     saveButton : {
