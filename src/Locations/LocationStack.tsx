@@ -11,7 +11,7 @@ interface LocationStackProps {
 
 
 export const LocationStack: React.FC<LocationStackProps> = ({navigation}) => {
-    const {getLocations} = useContext(LocationContext)
+    const {getLocations, saveLocations} = useContext(LocationContext)
     const [locationArray, setLocationArray] = useState<Location[]>([]);
 
     const [location, setLocation] = useState<ExpoLocation.LocationObject>();
@@ -32,7 +32,7 @@ export const LocationStack: React.FC<LocationStackProps> = ({navigation}) => {
     
     useEffect(() => {
         getLocations().then(items => setLocationArray(items))
-    }, [])
+    }, [saveLocations])
 
     return (
         <View style={styles.container}>

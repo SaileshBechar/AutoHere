@@ -32,4 +32,6 @@ export type HomeStackParamList = {
 export type TripStackParamList = {
     ListTrips: undefined;
     CreateTrip : undefined;
+    AddContactsToTrip : undefined; 
+    AddLocationToTrip : undefined; 
 }

@@ -1,13 +1,23 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react'
-import { View, Text, TouchableWithoutFeedback, StyleSheet } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react'
+import { View, Text, TouchableWithoutFeedback, StyleSheet, FlatList } from 'react-native';
 import { TripStackParamList } from '../ParamList';
+import { TripContext, Trip } from './TripProvider';
 
 interface ListTripsProps {
     navigation : NativeStackNavigationProp<TripStackParamList, "ListTrips">
 }
 
 export const ListTrips: React.FC<ListTripsProps> = ({navigation}) => {
+    const {getTrips, saveTrips, inProgTrip} = useContext(TripContext)
+    const [tripArray, setTripArray] = useState<Trip[]>([]);
+    useEffect(() => {
+        saveTrips([])
+    }, [])
+    useEffect(() => {
+        getTrips().then(items => setTripArray(items))
+        console.log("rendered", tripArray)
+    }, [inProgTrip])
         return (
             <View style={styles.container}>
             <TouchableWithoutFeedback
@@ -19,16 +29,16 @@ export const ListTrips: React.FC<ListTripsProps> = ({navigation}) => {
                     <Text style={{fontSize: 20}}>Add Trip</Text>
                 </View>
             </TouchableWithoutFeedback>
-            {/* {locationArray.length > 0 ? 
+            {tripArray.length > 0 ? 
             <FlatList
-                data={locationArray}
+                data={tripArray}
                 renderItem={({ item, index, separators }) => (
-                    <View style={styles.location}>
+                    <View style={styles.trip}>
                         <Text>{item.Name}</Text>
                     </View>
                 )}
-                keyExtractor={(item : Location) => item.Name}
-            /> : null} */}
+                keyExtractor={(item : Trip) => item.Name}
+            /> : null}
         </View>
     );
 }

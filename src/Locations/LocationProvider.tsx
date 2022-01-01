@@ -8,7 +8,7 @@ export interface Location {
     Radius : number;
 }
 
-const _createDefaultLocation = () => { return {
+export const _createDefaultLocation = () => { return {
     Name: "",
     Longitude : 0,
     Latitude : 0,

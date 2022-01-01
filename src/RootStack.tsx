@@ -14,14 +14,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootStack: React.FC<RootStackProps> = ({}) => {
         return (
-            
-        <LocationProvider>
-             <NavigationContainer>
+            <NavigationContainer>
                 <Stack.Navigator>
                     <Stack.Screen name="RouteTabs" options={{header : () => null}} component={RouteTabs} />
                     <Stack.Screen name="AddLocation" options={{headerTitle : "Select a location"}} component={AddLocationMap} />
                 </Stack.Navigator>
             </NavigationContainer>
-        </LocationProvider>
         );
 }

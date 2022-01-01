@@ -12,12 +12,12 @@ interface ListContactsProps {
 
 
 export const ListContacts: React.FC<ListContactsProps> = ({navigation}) => {
-  const {getContacts} = useContext(ContactContext)
+  const {getContacts, saveContacts} = useContext(ContactContext)
   const [currContacts, setCurrContacts] = useState<Contact[]>([])
 
   useEffect(() => {
       getContacts().then(items => setCurrContacts(items))
-  }, [])
+  }, [saveContacts])
 
     return (
       <View style={styles.container}>
