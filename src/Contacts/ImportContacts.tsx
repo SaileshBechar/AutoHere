@@ -10,9 +10,9 @@ interface ImportContactsProps {
 }
 
 export const ImportContacts: React.FC<ImportContactsProps> = ({navigation}) => {
-    const {getContacts, saveContacts} = useContext(ContactContext)
+    const {getContacts, saveContacts, contactArray, setContactArray} = useContext(ContactContext)
     const [importedContacts, setImportedContacts] = useState<Contact[]>([])
-    const [currContacts, setCurrContacts] = useState<Contact[]>([])
+    
 
     function ensure<T>(argument: T | undefined | null, message: string = 'This value was promised to be there.'): T {
         if (argument === undefined || argument === null) {
@@ -50,14 +50,14 @@ export const ImportContacts: React.FC<ImportContactsProps> = ({navigation}) => {
             }
           }
         })();
-        getContacts().then(items => setCurrContacts(items))
+        getContacts().then(items => setContactArray(items))
     }, []);
 
     const renderContacts = (item : Contact) => {
         return(
             <TouchableWithoutFeedback
             onPress={() => {
-                saveContacts([...currContacts, item])
+                saveContacts([...contactArray, item])
                 navigation.navigate("ListContacts")
             }}>
                 <View style={styles.contact}>

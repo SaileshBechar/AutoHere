@@ -10,13 +10,17 @@ export const TripContext = createContext<{
     setTripArray : (trip : Trip[]) => void
     getTrips : () => Promise<Trip[]>;
     saveTrips : (trips : Trip[]) => Promise<void>;
+    getTripDict : () => Promise<{[LatLngKey: string] : SMSDict[]} | void>; // TODO: shouldnt be void lol
+    saveTripDict : (tripDict : {[LatLngKey: string] : SMSDict[]}) => Promise<void>;
     }>({
         inProgTrip : {Name : "", Stops : []},
         setInProgTrip : () => {},
         tripArray : [], 
         setTripArray : () => {},
         getTrips : async () => [],
-        saveTrips : async () => {}
+        saveTrips : async () => {},
+        getTripDict : async () => {},
+        saveTripDict : async () => {}
     })
 
 export interface Trip {
@@ -27,6 +31,12 @@ export interface Trip {
 export interface TripStop {
     Contacts : Contact[];
     Location : Location;
+}
+
+export interface SMSDict {
+    ContactName : string,
+    PhoneNumber : string,
+    LocationName : string
 }
 
 interface TripProviderProps {}
@@ -55,10 +65,29 @@ export const TripProvider: React.FC<TripProviderProps> = ({children}) => {
                 try {
                     const jsonTrips = JSON.stringify(trips)
                     await AsyncStorage.setItem('Trips', jsonTrips)
+                    setTripArray(trips)
                 } catch(e) {
                     console.log("Error saving trips")
                 }
             },
+            getTripDict : async () => {
+                try {
+                    const jsonTripDict = await AsyncStorage.getItem('TripDict')
+                    return jsonTripDict !== null ? JSON.parse(jsonTripDict) as {[LatLngKey: string] : SMSDict[]} : {};
+                  } catch(e) {
+                    // error reading value
+                    console.log("Error reading TripDict")
+                    return {}
+                  }
+            }, 
+            saveTripDict : async (tripDict : {[LatLngKey: string] : SMSDict[]}) => {
+                try {
+                    const jsonTripDict = JSON.stringify(tripDict)
+                    await AsyncStorage.setItem('TripDict', jsonTripDict)
+                } catch(e) {
+                    console.log("Error saving TripDict")
+                }
+            }
         }}>{children}</TripContext.Provider>
     );
 }

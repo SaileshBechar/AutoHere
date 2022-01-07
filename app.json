@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "aumbawae",
-    "slug": "aumbawae",
+    "name": "AutoHere",
+    "slug": "AutoHere",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,7 +24,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.sublimesb.aumbawae",
+      "package": "com.sublimesb.autohere",
+      "versionCode" : 1,
       "permissions" : [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -33,6 +34,19 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#ffffff",
+          "sounds": [
+            "./assets/sounds/I Am Here.wav",
+            "./assets/sounds/On My Way.wav"
+          ]
+        }
+      ]
+    ]
   }
 }

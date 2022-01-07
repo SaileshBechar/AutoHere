@@ -20,6 +20,8 @@ export const LocationContext = React.createContext<{
     setInProgLocation : (location : Location) => void;
     isSheetOpen : boolean;
     setSheetOpen : (value : boolean) => void;
+    locationArray : Location[];
+    setLocationArray : (locationArray : Location[]) => void;
     getLocations : () => Promise<Location[]>
     saveLocations : (locations : Location[]) => Promise<void>;
     }>({
@@ -27,6 +29,8 @@ export const LocationContext = React.createContext<{
         setInProgLocation : () => {},
         isSheetOpen : false,
         setSheetOpen : () => {},
+        locationArray : [],
+        setLocationArray : () => {},
         getLocations : async () => [],
         saveLocations : async () => {}
     })
@@ -36,6 +40,7 @@ interface LocationProviderProps {}
 
 export const LocationProvider: React.FC<LocationProviderProps> = ({children}) => {
     const [inProgLocation, setInProgLocation] = useState<Location>(_createDefaultLocation())
+    const [locationArray, setLocationArray] = useState<Location[]>([]);
     const [isSheetOpen, setSheetOpen ] = useState(false)
 
     return (
@@ -44,6 +49,8 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({children}) =>
             setInProgLocation,
             isSheetOpen,
             setSheetOpen,
+            locationArray,
+            setLocationArray,
             getLocations : async () => {
                 try {
                     const jsonLocations = await AsyncStorage.getItem('Locations')
@@ -58,6 +65,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({children}) =>
                 try {
                     const jsonLocations = JSON.stringify(locations)
                     await AsyncStorage.setItem('Locations', jsonLocations)
+                    setLocationArray(locations)
                 } catch(e) {
                     console.log("Error saving locations")
                 }

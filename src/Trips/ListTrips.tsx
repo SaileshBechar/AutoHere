@@ -13,11 +13,8 @@ export const ListTrips: React.FC<ListTripsProps> = ({navigation}) => {
     
     useEffect(() => {
         getTrips().then(items => setTripArray(items))
-        console.log("Init array", tripArray)
     }, [])
-    useEffect(() => { 
-        console.log("rendered", tripArray)
-    }, [tripArray])
+
         return (
             <View style={styles.container}>
             <TouchableWithoutFeedback

@@ -11,8 +11,7 @@ interface LocationStackProps {
 
 
 export const LocationStack: React.FC<LocationStackProps> = ({navigation}) => {
-    const {getLocations, saveLocations} = useContext(LocationContext)
-    const [locationArray, setLocationArray] = useState<Location[]>([]);
+    const {getLocations, locationArray, setLocationArray, saveLocations} = useContext(LocationContext)
 
     const [location, setLocation] = useState<ExpoLocation.LocationObject>();
     const [errorMsg, setErrorMsg] = useState("");
@@ -24,7 +23,7 @@ export const LocationStack: React.FC<LocationStackProps> = ({navigation}) => {
             setErrorMsg('Permission to access location was denied');
             return;
           }
-    
+          // TODO add loading screen
           let location = await ExpoLocation.getCurrentPositionAsync({});
           setLocation(location);
         })();
@@ -32,12 +31,13 @@ export const LocationStack: React.FC<LocationStackProps> = ({navigation}) => {
     
     useEffect(() => {
         getLocations().then(items => setLocationArray(items))
-    }, [saveLocations])
+    }, [])
 
     return (
         <View style={styles.container}>
             <TouchableWithoutFeedback
                 onPress={() => {
+                    console.log(location?.coords)
                     navigation.navigate("AddLocation", {coords : location?.coords}) 
                 }}
             >

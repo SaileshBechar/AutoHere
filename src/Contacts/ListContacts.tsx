@@ -12,12 +12,11 @@ interface ListContactsProps {
 
 
 export const ListContacts: React.FC<ListContactsProps> = ({navigation}) => {
-  const {getContacts, saveContacts} = useContext(ContactContext)
-  const [currContacts, setCurrContacts] = useState<Contact[]>([])
+  const {getContacts, contactArray, setContactArray} = useContext(ContactContext)
 
   useEffect(() => {
-      getContacts().then(items => setCurrContacts(items))
-  }, [saveContacts])
+      getContacts().then(items => setContactArray(items))
+  }, [])
 
     return (
       <View style={styles.container}>
@@ -29,9 +28,9 @@ export const ListContacts: React.FC<ListContactsProps> = ({navigation}) => {
                   <Text style={{fontSize: 20}}>Create Contact</Text>
               </View>
           </TouchableWithoutFeedback>
-          {currContacts.length > 0 ? 
+          {contactArray.length > 0 ? 
             <FlatList
-                data={currContacts}
+                data={contactArray}
                 renderItem={({ item, index, separators }) => (
                   <View style={styles.contact}>
                         <Text>{item.Name}</Text>

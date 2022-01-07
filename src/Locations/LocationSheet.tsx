@@ -13,9 +13,8 @@ interface LocationSheetProps {
 }
 
 export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
-  const {inProgLocation, setInProgLocation, isSheetOpen, setSheetOpen, getLocations, saveLocations} = useContext(LocationContext)
+  const {inProgLocation, setInProgLocation, isSheetOpen, setSheetOpen, locationArray, saveLocations} = useContext(LocationContext)
   const [isSheetFullExpanded, setSheetFullExpanded] = useState(false);
-  const [locationArray, setLocationArray] = useState<Location[]>([]);
   const [locationName, onChangeName] = useState("");
 
   const SHEET_FULL_EXPANDED = 5
@@ -43,10 +42,6 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
       )
     }
   }, [isSheetOpen])
-  useEffect(() => {
-    setInProgLocation({...inProgLocation, Name : locationName})
-    getLocations().then((items : Location[]) => setLocationArray(items))
-  }, [locationName])
 
   const handleSheetFullExpanded = () => {
     if (isSheetFullExpanded) {
@@ -73,7 +68,8 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
     return locationName.length > 1 && isSheetFullExpanded? (
       <TouchableWithoutFeedback
             onPress={() => {
-              saveLocations([...locationArray, inProgLocation])
+              setInProgLocation({...inProgLocation, Name : locationName})
+              saveLocations([...locationArray, {...inProgLocation, Name: locationName}])
               navigation.goBack()
             }}
           >

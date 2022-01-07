@@ -22,10 +22,6 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
 		latitudeDelta: 0.0371,
 		longitudeDelta: 0.0307
 	})
-    const [placesMarker, setPlacesMarker] = useState({
-        latitude: route.params.coords?.latitude ?? 43.642567,
-		longitude: route.params.coords?.longitude ?? -79.387054
-    })
     return (
         <View>
             <GooglePlacesAutocomplete
@@ -41,14 +37,11 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
                             latitude: details.geometry.location.lat,
                             longitude: details.geometry.location.lng
                         })
-                        setPlacesMarker({
-                            latitude: details.geometry.location.lat,
-                            longitude: details.geometry.location.lng
-                        })
                         setInProgLocation({ ...inProgLocation, 
                             "Latitude" : details.geometry.location.lat, 
                             "Longitude" :details.geometry.location.lng,
                         })
+                        setSheetOpen(true)
                     }
 				}}
 				query={{
@@ -68,6 +61,7 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
             initialRegion={region}
             region={region}
             rotateEnabled={false}
+            showsUserLocation={true}
             onPress={(e) => {
                 setInProgLocation({ ...inProgLocation, 
                     "Latitude" : e.nativeEvent.coordinate.latitude, 
@@ -86,13 +80,6 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
 				<Circle center={
                     {latitude : inProgLocation.Latitude, longitude : inProgLocation.Longitude}} 
                     radius={inProgLocation.Radius} />
-                <Marker
-					coordinate={{
-                        "latitude" : placesMarker.latitude,
-                        "longitude" : placesMarker.longitude
-                    }}
-				>
-				</Marker>
             </MapView>
         </View>
       );

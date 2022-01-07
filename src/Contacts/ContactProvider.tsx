@@ -1,10 +1,14 @@
-import React, { createContext } from 'react'
+import React, { createContext, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const ContactContext = createContext<{
+    contactArray : Contact[];
+    setContactArray : (contacts : Contact[]) => void;
     getContacts : () => Promise<Contact[]>;
     saveContacts : (contacts : Contact[]) => Promise<void>;
     }>({
+        contactArray : [],
+        setContactArray : () => {},
         getContacts : async () => [],
         saveContacts : async () => {}
     })
@@ -19,8 +23,12 @@ export interface Contact {
 interface ContactProviderProps {}
 
 export const ContactProvider: React.FC<ContactProviderProps> = ({children}) => {
+    const [contactArray, setContactArray] = useState<Contact[]>([])
+
     return (
         <ContactContext.Provider value={{
+            contactArray,
+            setContactArray,
             getContacts : async () => {
                 try {
                     const jsonContacts = await AsyncStorage.getItem('Contacts')

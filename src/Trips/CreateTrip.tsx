@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableWithoutFeedback, FlatList, TextInput }
 import { Contact, ContactContext } from '../Contacts/ContactProvider';
 import { LocationContext, Location, _createDefaultLocation} from '../Locations/LocationProvider';
 import { TripStackParamList } from '../ParamList';
-import { Trip, TripContext } from './TripProvider';
+import { Trip, TripContext, TripStop } from './TripProvider';
 
 interface CreateTripProps {
     navigation : NativeStackNavigationProp<TripStackParamList, "CreateTrip">
@@ -17,71 +17,67 @@ export const CreateTrip: React.FC<CreateTripProps> = ({navigation}) => {
 
     useEffect(() => {
         getTrips().then(items => {
-            // console.log("CT init", items)
             setTripArray(items)
         })
     }, [])
 
-    useEffect(() => {
-        console.log("InProgTrip", inProgTrip)
-    }, [inProgTrip])
-
     return (
             <View style={styles.container}>
                 <View style={styles.tripContainer}>
-                { inProgTrip.Stops[0].Contacts.length > 0 ? (
-                    <View style={{}}>
-                         {
-                            Object.entries(inProgTrip.Stops[0].Contacts).map(([key, val]) =>   
-                                <TouchableWithoutFeedback
+                    {inProgTrip.Stops.map((stop, index) => {
+                        return [(stop.Contacts.length > 0) ? (
+                            <View style={{}} key={index + "contactlist"}>
+                            {
+                                stop.Contacts.map((contact, c_index) => { return (
+                                    <TouchableWithoutFeedback key={contact.Id+c_index}
                                     onPress={() => navigation.navigate("AddContactsToTrip")}>
+                                       <View style={styles.addButton}>
+                                           <Text>{contact.Name}</Text>
+                                       </View>
+                                   </TouchableWithoutFeedback>
+                                )})
+                           }
+                        </View> ) : (
+                       <TouchableWithoutFeedback
+                           onPress={() => navigation.navigate("AddContactsToTrip")} key={index + "contacts"}>
+                           <View style={styles.addButton}>
+                               <Text>Add from your Friends</Text>
+                           </View>
+                       </TouchableWithoutFeedback>
+                        ),
+                        (<View key={index + "text"}>
+                            <TextInput
+                            style={styles.input}
+                            onChangeText={setTripName}
+                            value={tripName}
+                            placeholder="Enter a Trip Name"
+                            maxLength={20}
+                            />
+                        </View>),
+                        stop.Location.Name !== "" ? (
+                            <View style={{}} key={stop.Location.Name}> 
+                                <TouchableWithoutFeedback
+                                    onPress={() => navigation.navigate("AddLocationToTrip")} >
                                     <View style={styles.addButton}>
-                                        <Text key={val.Id}>{val.Name}</Text>
+                                        <Text>{stop.Location.Name}</Text>
                                     </View>
                                 </TouchableWithoutFeedback>
-                            )
-                        }
-                    </View>
-                ) : (
-                    <TouchableWithoutFeedback
-                        onPress={() => navigation.navigate("AddContactsToTrip")}>
-                        <View style={styles.addButton}>
-                            <Text>Add from your Friends</Text>
-                        </View>
-                    </TouchableWithoutFeedback>
-                )}
-                    <View>
-                        <TextInput
-                        style={styles.input}
-                        onChangeText={setTripName}
-                        value={tripName}
-                        placeholder="Enter a Trip Name"
-                        maxLength={20}
-                        />
-                    </View>
-                { inProgTrip.Stops[0].Location.Name !== "" ? (
-                    <View style={{}}> 
-                        <TouchableWithoutFeedback
-                            onPress={() => navigation.navigate("AddLocationToTrip")}>
-                            <View style={styles.addButton}>
-                                <Text>{inProgTrip.Stops[0].Location.Name}</Text>
                             </View>
-                        </TouchableWithoutFeedback>
-                    </View>
-                ) : (
-                    <TouchableWithoutFeedback
-                        onPress={() => navigation.navigate("AddLocationToTrip")}>
-                        <View style={styles.addButton}>
-                            <Text>Add from your Locations</Text>
-                        </View>
-                    </TouchableWithoutFeedback>
-                )}
+                        ) : (
+                            <TouchableWithoutFeedback
+                                onPress={() => navigation.navigate("AddLocationToTrip")} key={index + "location"}>
+                                <View style={styles.addButton}>
+                                    <Text>Add from your Locations</Text>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        )]
+                       
+                    })}
                 </View>
                 {
-                    tripName.length > 1 ? (
+                    tripName.length > 1 && inProgTrip.Stops[0].Location.Name !== "" ? (
                         <TouchableWithoutFeedback
                                 onPress={() => {
-                                setTripArray([...tripArray, {Name : tripName, Stops : inProgTrip.Stops}])
                                 saveTrips([...tripArray, {Name : tripName, Stops : inProgTrip.Stops}])
                                 setInProgTrip({Name: "", Stops : [{Contacts: [], Location: _createDefaultLocation()}]})
                                 navigation.navigate("ListTrips")
@@ -143,7 +139,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 50,
         borderRadius: 100,
         backgroundColor: "#A9AFD1",
-        marginTop: 10,
+        marginTop: 30,
         marginBottom: 30,
         fontSize: 30
       },
