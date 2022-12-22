@@ -4,6 +4,8 @@ import { SMSDict } from './Trips/TripProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Notify } from './Trips/StartTrip';
+import * as SMS from 'expo-sms';
+import * as functions from 'firebase-functions';
 
 interface TaskManagerGeoFence {
     data : {
@@ -29,11 +31,16 @@ export const GeoFenceTask = async <TaskManagerGeoFence>({ data : {eventType, reg
       return;
     }
 
-    if (eventType === GeofencingEventType.Enter) {
+    let smsMSG = ""
+    if (eventType === GeofencingEventType.Enter) { // TODO: Use some kind of React thing?
       console.log("You've entered region:", region);
+      smsMSG = "Sailesh is here!"
     } else if (eventType === GeofencingEventType.Exit) {
       console.log("You've left region:", region);
+      smsMSG = "Sailesh is leaving " + region.identifier
     }
+
+    const isAvailable = await SMS.isAvailableAsync();
     
     try {
         const jsonTripDict = await AsyncStorage.getItem('TripDict')
@@ -42,8 +49,17 @@ export const GeoFenceTask = async <TaskManagerGeoFence>({ data : {eventType, reg
         const latlngkey = region.latitude.toString() + "_" + region.longitude.toString()
         if (latlngkey in tripDict) {
             tripDict[latlngkey].map((contactInfo) => {
-                const [first, ...second] = contactInfo.ContactName.split(" ")
-                const msg = "Hey " + first + ", Sailesh is Here!"
+                const [firstName, ...secondNames] = contactInfo.ContactName.split(" ")
+                const msg = "Hey " + firstName + ", Sailesh is Here!"
+                
+                if (isAvailable) {
+                    console.log("SMS available!")
+                    sendSMS([contactInfo.PhoneNumber], msg)
+                } else {
+                    const error = "No SMS enabled on device"
+                    console.log(error)
+                    Notify(error)
+                }
                 console.log(msg)
                 Notify(msg)
             })
@@ -67,6 +83,12 @@ export const GeoFenceTask = async <TaskManagerGeoFence>({ data : {eventType, reg
     return true
 }
 
+export const sendSMS = async (phoneNumber : string[], msg : string) => {
+    const { result } = await SMS.sendSMSAsync(
+        phoneNumber,
+        msg,
+    );
+}
 export const LocationTask = <TaskManagerLocation>({ data : {locations}, error } : TaskManagerLocation) => {
     if (error) {
         // check `error.message` for more details.
