@@ -5,24 +5,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Notify } from './Trips/StartTrip';
 import * as SMS from 'expo-sms';
-import * as functions from 'firebase-functions';
 
-interface TaskManagerGeoFence {
+export interface TaskManagerGeoFence {
     data : {
         eventType : GeofencingEventType,
         region : LocationRegion
-    }, 
-    error : TaskManager.TaskManagerError
+    } | any, 
+    error : TaskManager.TaskManagerError | null
 };
 
-interface TaskManagerLocation {
+export interface TaskManagerLocation {
     data : {
         location : LocationObject
-    }, 
-    error : TaskManager.TaskManagerError
+    } | any, 
+    error : TaskManager.TaskManagerError | null
 };
 
-export const GeoFenceTask = async <TaskManagerGeoFence>({ data : {eventType, region}, error } : TaskManagerGeoFence) => {
+export const GeoFenceTask = async <T extends TaskManagerGeoFence>({ data : {eventType, region}, error } : TaskManagerGeoFence) => {
 
 
     if (error) {
@@ -89,7 +88,7 @@ export const sendSMS = async (phoneNumber : string[], msg : string) => {
         msg,
     );
 }
-export const LocationTask = <TaskManagerLocation>({ data : {locations}, error } : TaskManagerLocation) => {
+export const LocationTask = <T extends TaskManagerLocation>({ data, error } : TaskManagerLocation) => {
     if (error) {
         // check `error.message` for more details.
         console.log("LocationTask Error Occurred")
