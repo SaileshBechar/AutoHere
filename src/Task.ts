@@ -3,8 +3,9 @@ import * as TaskManager from 'expo-task-manager';
 import { SMSDict } from './Trips/TripProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import { Notify } from './Trips/StartTrip';
 import * as SMS from 'expo-sms';
+
+const SENDER = "Sailesh"
 
 export interface TaskManagerGeoFence {
     data : {
@@ -30,49 +31,44 @@ export const GeoFenceTask = async <T extends TaskManagerGeoFence>({ data : {even
       return;
     }
 
-    let smsMSG = ""
-    if (eventType === GeofencingEventType.Enter) { // TODO: Use some kind of React thing?
-      console.log("You've entered region:", region);
-      smsMSG = "Sailesh is here!"
-    } else if (eventType === GeofencingEventType.Exit) {
-      console.log("You've left region:", region);
-      smsMSG = "Sailesh is leaving " + region.identifier
-    }
-
     const isAvailable = await SMS.isAvailableAsync();
     
     try {
         const jsonTripDict = await AsyncStorage.getItem('TripDict')
         const tripDict = jsonTripDict !== null ? JSON.parse(jsonTripDict) as {[LatLngKey: string] : SMSDict[]} : {};
-        console.log(tripDict)
+        console.log("Trip Dictionary:", tripDict)
         const latlngkey = region.latitude.toString() + "_" + region.longitude.toString()
-        if (latlngkey in tripDict) {
-            tripDict[latlngkey].map((contactInfo) => {
+        tripDict[latlngkey].map((contactInfo) => {
+            if (latlngkey in tripDict && eventType === GeofencingEventType.Enter) {
                 const [firstName, ...secondNames] = contactInfo.ContactName.split(" ")
-                const msg = "Hey " + firstName + ", Sailesh is Here!"
-                
                 if (isAvailable) {
+                    console.log("You've entered region:", region);
                     console.log("SMS available!")
-                    sendSMS([contactInfo.PhoneNumber], msg)
+                    const enterMsg = "Hey " + firstName + ", " + SENDER + " is Here!"
+                    Notify(enterMsg)
+                    sendSMS(contactInfo.PhoneNumber, enterMsg)
                 } else {
                     const error = "No SMS enabled on device"
                     console.log(error)
                     Notify(error)
-                }
-                console.log(msg)
-                Notify(msg)
-            })
-            delete tripDict[latlngkey]
-
-            try {
-                const jsonTripDict = JSON.stringify(tripDict)
-                await AsyncStorage.setItem('TripDict', jsonTripDict)
-            } catch(e) {
-                console.log("Error saving TripDict")
+                }    
+                delete tripDict[latlngkey]
             }
-            return true
-    }
-      } catch(e) {
+            else if (!(latlngkey in tripDict) && eventType === GeofencingEventType.Exit) {
+                console.log("You've left region:", region);
+                const exitMsg = SENDER + " is now leaving " + contactInfo.LocationName
+                Notify(exitMsg)
+                sendSMS(contactInfo.PhoneNumber, exitMsg)
+            }
+        })
+        try {
+            const jsonTripDict = JSON.stringify(tripDict)
+            await AsyncStorage.setItem('TripDict', jsonTripDict)
+        } catch(e) {
+            console.log("Error saving TripDict")
+        }
+        return true
+    } catch(e) {
         // error reading value
         console.log("Error reading TripDict")
         return {}
@@ -82,12 +78,38 @@ export const GeoFenceTask = async <T extends TaskManagerGeoFence>({ data : {even
     return true
 }
 
-export const sendSMS = async (phoneNumber : string[], msg : string) => {
-    const { result } = await SMS.sendSMSAsync(
-        phoneNumber,
-        msg,
-    );
+export const sendSMS = async (phoneNumber : string, msg : string) => {
+    try {
+        console.log("Sending Message", phoneNumber, msg)
+        fetch('https://us-central1-autoheredatabase.cloudfunctions.net/sendMessage', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                msg: msg,
+                phone: phoneNumber,
+            }),
+        });
+        } catch (err) {
+        console.log("SendSMS didnt work.");
+        console.log(err);
+    }
 }
+
+export const Notify = (msg : string) => {
+    Notifications.scheduleNotificationAsync({
+        content: {
+            title: msg,
+            sound: true,
+            autoDismiss: true
+        },
+    trigger: null,
+    });
+    Notifications.dismissAllNotificationsAsync()
+}
+
 export const LocationTask = <T extends TaskManagerLocation>({ data, error } : TaskManagerLocation) => {
     if (error) {
         // check `error.message` for more details.

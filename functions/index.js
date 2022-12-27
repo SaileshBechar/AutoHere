@@ -2,32 +2,24 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin/app")
 const twilio = require('twilio');
 admin.initializeApp();
-// admin.initializeApp(functions.config().firebase);
-
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
 
 const accountSid = functions.config().twilio.sid;
 const authToken = functions.config().twilio.token;
-
-console.log(`Twilio account: ${accountSid}`);
 
 const client = new twilio(accountSid, authToken);
 
 const twilioNumber = "+12899023542";
 
 exports.sendMessage = functions.https.onRequest(async (req, res) => {
-  console.log(req);
+  console.log("Body:", req.body);
 
-  const longitude = req.query.long;
-  const latitude = req.query.lat;
-  const phoneNumber = req.query.phone;
+  const longitude = req.body.long;
+  const latitude = req.body.lat;
+  const phoneNumber = req.body.phone;
+  const msg = req.body.msg;
 
   const textMessage = {
-    body: `See user position at Google: http://www.google.com/maps/place/${latitude},${longitude}`,
+    body: msg,
     to: phoneNumber,
     from: twilioNumber,
   };
