@@ -37,7 +37,7 @@ export const LocationStack: React.FC<LocationStackProps> = ({navigation}) => {
         <View style={styles.container}>
             <TouchableWithoutFeedback
                 onPress={() => {
-                    console.log(location?.coords)
+                    console.log("Coordinates", location?.coords)
                     navigation.navigate("AddLocation", {coords : location?.coords}) 
                 }}
             >

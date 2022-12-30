@@ -10,7 +10,7 @@ interface HomeProps {
 }
 
 export const Welcome: React.FC<HomeProps> = ({navigation}) => {
-    
+
     useEffect(() => {
        async () => {
           const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -45,6 +45,7 @@ export const Welcome: React.FC<HomeProps> = ({navigation}) => {
         //   });
        }
     })
+
     return (
         <Center>
 
@@ -59,7 +60,7 @@ export const Welcome: React.FC<HomeProps> = ({navigation}) => {
                 ) : 
                 null
             } */}
-        
+       
         </Center>
     );
 }

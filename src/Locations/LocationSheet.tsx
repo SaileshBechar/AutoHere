@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { StyleSheet, Text, View, Button, useWindowDimensions, TouchableWithoutFeedback, ScrollView, TextInput} from 'react-native';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
-import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { color, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LocationContext, Location } from './LocationProvider';
@@ -16,7 +16,7 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
   const {inProgLocation, setInProgLocation, isSheetOpen, setSheetOpen, locationArray, saveLocations} = useContext(LocationContext)
   const [isSheetFullExpanded, setSheetFullExpanded] = useState(false);
   const [locationName, onChangeName] = useState("");
-
+  
   const SHEET_FULL_EXPANDED = 5
   const SHEET_PEEKING = 1.4
   const dimensions = useWindowDimensions();
@@ -60,7 +60,7 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
 
   const ExpandIcon = () => {
     const icon_name = isSheetFullExpanded ? "arrow-down-drop-circle-outline" : "arrow-up-drop-circle-outline"
-    return <Icon name={icon_name} size={50}/>
+    return <Icon name={icon_name} size={50} color={"#0A5999"}/>
   }
 
   const SaveButton = () => {
@@ -140,10 +140,11 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
         <Text style={{marginTop: 10}}>Radius: {inProgLocation.Radius.toFixed(1)} m</Text>
         <Slider
           style={{width: 400, height: 50, marginTop: 20}}
-          minimumValue={5}
+          minimumValue={10}
           maximumValue={1000}
-          minimumTrackTintColor="#000000"
-          maximumTrackTintColor="#000000"
+          minimumTrackTintColor="#0A5999"
+          maximumTrackTintColor="#0A5999"
+          thumbTintColor="#f0c756"
           value={inProgLocation.Radius}
           onValueChange={(val) => {
             setInProgLocation({...inProgLocation, Radius : val})
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     position: 'absolute',
     top: 5,
-    left: 10
+    left: 10,
   },
   input: {
     height: 40,
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 50,
     borderRadius: 100,
-    backgroundColor: "#A9AFD1",
+    backgroundColor: "#0A5999",
     marginTop: 10,
     marginBottom: 30,
     fontSize: 30

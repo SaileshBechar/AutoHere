@@ -90,10 +90,10 @@ export const StartTrip: React.FC<StartTripProps> = ({navigation, route}) => {
     
     useEffect(() => {
         return (() => {
-            ExpoLocation.stopGeofencingAsync("SendSMS")
-            ExpoLocation.stopLocationUpdatesAsync("LocationTask")
-            TaskManager.unregisterAllTasksAsync()
-            console.log("stopped services")
+            // ExpoLocation.stopGeofencingAsync("SendSMS")
+            // ExpoLocation.stopLocationUpdatesAsync("LocationTask")
+            // TaskManager.unregisterAllTasksAsync()
+            // console.log("stopped services")
         })
     }, [])
 
