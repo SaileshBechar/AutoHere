@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
-import MapView, { Circle, LatLng, Marker, Callout, Region, Polyline as MapViewPolyline, MapMarker } from "react-native-maps";
+import { StyleSheet, Text, View, Dimensions, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
+import MapView, { Circle, LatLng, Marker, Region, Polyline as MapViewPolyline } from "react-native-maps";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete"
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import { LocationSheet } from './LocationSheet';
 import { useContext, useRef, useState } from 'react';
 import { LocationContext, Location } from './LocationProvider';
 import Polyline from '@mapbox/polyline';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface MapProps {
     navigation : NativeStackNavigationProp<RootStackParamList, "AddLocation">
@@ -32,7 +33,7 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
         coords: Array<LatLng>,
         eta: number}
     >({coords: [], eta: 0})
-    const markerRef = useRef<MapMarker>(null)
+    const input = useRef<any>(null)
     
     const getDirections = async (startLoc : string, destinationLoc : string) => {
         try {
@@ -66,6 +67,7 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
 				GooglePlacesSearchQuery={{
 					rankby: "distance"
 				}}
+                ref={input}
 				onPress={(data, details = null) => {
 					// 'details' is provided when fetchDetails = true
                     if (details) {
@@ -82,9 +84,18 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
                         setSheetOpen(true)
                         setIsCalculateDirections(true)
                         getDirections(`${userLocation.latitude}, ${userLocation.longitude}`,`${details.geometry.location.lat}, ${details.geometry.location.lng}`)
-                        // markerRef.current?.showCallout()
                     }
 				}}
+                renderRightButton = {() => {
+                    return(
+                         <TouchableOpacity
+                            style={styles.clearButton}
+                            onPress={() => { input.current?.clear()}} >
+                                    <Icon name="close-circle-outline" size={20}/>
+                        </TouchableOpacity>
+                    )
+                }}
+                textInputProps={{clearButtonMode: 'never'}}
 				query={{
 					key: 'AIzaSyB5OFOryVllEEk_FXbTpd_MY-dcAlB1dlI',
 					language: "en",
@@ -93,8 +104,8 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
 				}}
 				styles={{
 					container: { position: "absolute", top:5, width: "100%", zIndex: 1,},
-					listView: { backgroundColor: "white", marginTop: 0},
-                    textInput: {height:50, display: 'flex', justifyContent:"center", alignItems:"center", width: "80%", zIndex: 1, borderRadius: 100},
+					listView: { backgroundColor: "white", marginTop: 0, borderRadius: 100},
+                    textInput: {paddingLeft: 20, paddingRight: 50, height:50, zIndex: 1, borderRadius: 100, marginRight: -20},
                     textInputContainer: {display: 'flex', justifyContent: 'center', alignItems: 'flex-start', width: Dimensions.get('window').width - 20, left: 10}
 				}}
 			/>
@@ -105,7 +116,7 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
             rotateEnabled={false}
             showsUserLocation={true}
             showsMyLocationButton={false}
-            showsTraffic={true}
+            showsTraffic={false}
             onPress={(e) => {
                 setInProgLocation({ ...inProgLocation, 
                     "Latitude" : e.nativeEvent.coordinate.latitude, 
@@ -113,7 +124,6 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
                 setSheetOpen(true)
                 setIsCalculateDirections(true)
                 getDirections(`${userLocation.latitude}, ${userLocation.longitude}`,`${e.nativeEvent.coordinate.latitude}, ${e.nativeEvent.coordinate.longitude}`)
-                // markerRef.current?.showCallout()
             }}
             onUserLocationChange={(e) => {
                 setUserLocation({
@@ -126,20 +136,17 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
             }}>
 				<Marker
 					coordinate={{latitude : inProgLocation.Latitude, longitude : inProgLocation.Longitude}}
-					pinColor="#0A5999"
-                    calloutOffset={{x: -5, y: 0}}
-                    calloutAnchor={{x: 0.5, y: -.1}}
-                    ref={markerRef}
-				>
-                    <Callout tooltip>
-                        <View style={styles.callout}>
-                            <Text>{directions.eta} mins</Text>
-                        </View>
-                    </Callout>
-                    {/* <View style={styles.callout}> */}
-                        {/* <Text>{directions.eta} mins</Text> */}
-                    {/* </View> */}
+					pinColor="#52ABF4">                   
 				</Marker>
+                <Marker
+					coordinate={{latitude : inProgLocation.Latitude, longitude : inProgLocation.Longitude}}
+                    centerOffset={{x : 0, y: -0.1}}
+                    anchor={{x: 0.5, y:2.6}}
+				>
+                    <View style={styles.callout}>
+                        <Text>{directions.eta} mins</Text>
+                    </View>
+                </Marker>
 				<Circle center={
                     {latitude : inProgLocation.Latitude, longitude : inProgLocation.Longitude}} 
                     radius={inProgLocation.Radius} 
@@ -147,8 +154,8 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
                 {isCalculateDirections && directions.eta > 0 && 
                      <MapViewPolyline 
                      coordinates={directions.coords}
-                     strokeWidth={3}
-                     strokeColor="#0A5999"/>
+                     strokeWidth={5}
+                     strokeColor="#52ABF4"/>
                 }  
             </MapView>
         </View>
@@ -167,6 +174,12 @@ const styles = StyleSheet.create({
     width: 90, 
     height: 30, 
     borderRadius: 20, 
-    backgroundColor: "#f5f5f4"
+    backgroundColor: "#f5f5f4",
   },
+  clearButton : {
+    position: 'relative',
+    top: 15,
+    right: 20,
+    zIndex: 2
+  }
 });

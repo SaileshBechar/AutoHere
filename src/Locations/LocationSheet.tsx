@@ -142,8 +142,8 @@ export const LocationSheet: React.FC<LocationSheetProps> = ({navigation}) => {
           style={{width: 400, height: 50, marginTop: 20}}
           minimumValue={10}
           maximumValue={1000}
-          minimumTrackTintColor="#0A5999"
-          maximumTrackTintColor="#0A5999"
+          minimumTrackTintColor="#52ABF4"
+          maximumTrackTintColor="#52ABF4"
           thumbTintColor="#f0c756"
           value={inProgLocation.Radius}
           onValueChange={(val) => {
