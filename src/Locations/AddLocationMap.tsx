@@ -33,7 +33,8 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
         coords: Array<LatLng>,
         eta: number}
     >({coords: [], eta: 0})
-    const input = useRef<any>(null)
+    const [selection, setSelection] = useState({start: 0, end: 0})
+    const autoCompleteRef = useRef<any>(null)
     
     const getDirections = async (startLoc : string, destinationLoc : string) => {
         try {
@@ -67,7 +68,7 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
 				GooglePlacesSearchQuery={{
 					rankby: "distance"
 				}}
-                ref={input}
+                ref={autoCompleteRef}
 				onPress={(data, details = null) => {
 					// 'details' is provided when fetchDetails = true
                     if (details) {
@@ -84,18 +85,24 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
                         setSheetOpen(true)
                         setIsCalculateDirections(true)
                         getDirections(`${userLocation.latitude}, ${userLocation.longitude}`,`${details.geometry.location.lat}, ${details.geometry.location.lng}`)
+                        setSelection({start: 0, end: 0})
                     }
 				}}
                 renderRightButton = {() => {
                     return(
                          <TouchableOpacity
                             style={styles.clearButton}
-                            onPress={() => { input.current?.clear()}} >
+                            onPress={() => { autoCompleteRef.current?.clear()}} >
                                     <Icon name="close-circle-outline" size={20}/>
                         </TouchableOpacity>
                     )
                 }}
-                textInputProps={{clearButtonMode: 'never'}}
+                textInputProps={{clearButtonMode: 'never', selection:selection, onSelectionChange: (syntheticEvent) => {
+                    const { nativeEvent } = syntheticEvent;
+                    const { selection } = nativeEvent;
+                    console.log("onSelectionChange", selection);
+                    setSelection(selection);
+                  }}}
 				query={{
 					key: 'AIzaSyB5OFOryVllEEk_FXbTpd_MY-dcAlB1dlI',
 					language: "en",
