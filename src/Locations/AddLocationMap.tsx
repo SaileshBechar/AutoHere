@@ -8,8 +8,8 @@ import { RootStackParamList } from '../ParamList';
 import { LocationSheet } from './LocationSheet';
 import { useContext, useRef, useState } from 'react';
 import { LocationContext, Location } from './LocationProvider';
-import Polyline from '@mapbox/polyline';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {getDirections} from '../Task'
 
 interface MapProps {
     navigation : NativeStackNavigationProp<RootStackParamList, "AddLocation">
@@ -35,30 +35,6 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
     >({coords: [], eta: 0})
     const [selection, setSelection] = useState({start: 0, end: 0})
     const autoCompleteRef = useRef<any>(null)
-    
-    const getDirections = async (startLoc : string, destinationLoc : string) => {
-        try {
-            let resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }&key=AIzaSyABBscLtJvxlo8pAMXJ9oe3uap4TfGRz8I`)
-            let respJson = await resp.json();
-            let points = Polyline.decode(respJson.routes[0].overview_polyline.points);
-            let coords = points.map((point : number[], index : number) => {
-                return  {
-                    latitude : point[0],
-                    longitude : point[1]
-                }
-            })
-            
-            const duration = respJson.routes[0].legs.reduce((carry : number, curr : any) => {
-                return carry + (curr.duration_in_traffic ? curr.duration_in_traffic.value : curr.duration.value);
-            }, 0) / 60
-            console.log("ETA:", Math.round(duration), " mins")
-            setDirections({coords : coords, eta: Math.round(duration)})
-
-        } catch(error) {
-            alert(error)
-            return error
-        }
-    }
 
     return (
         <View>
@@ -69,7 +45,7 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
 					rankby: "distance"
 				}}
                 ref={autoCompleteRef}
-				onPress={(data, details = null) => {
+				onPress={async (data, details = null) => {
 					// 'details' is provided when fetchDetails = true
                     if (details) {
                         setRegion((prevRegion : Region) => ({ 
@@ -84,7 +60,7 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
                         }))
                         setSheetOpen(true)
                         setIsCalculateDirections(true)
-                        getDirections(`${userLocation.latitude}, ${userLocation.longitude}`,`${details.geometry.location.lat}, ${details.geometry.location.lng}`)
+                        setDirections(await getDirections(`${userLocation.latitude}, ${userLocation.longitude}`,`${details.geometry.location.lat}, ${details.geometry.location.lng}`))
                         setSelection({start: 0, end: 0})
                     }
 				}}
@@ -93,27 +69,34 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
                          <TouchableOpacity
                             style={styles.clearButton}
                             onPress={() => { autoCompleteRef.current?.clear()}} >
-                                    <Icon name="close-circle-outline" size={20}/>
+                                    <Icon name="close-circle-outline" size={25} color={'grey'}/>
                         </TouchableOpacity>
                     )
                 }}
                 textInputProps={{clearButtonMode: 'never', selection:selection, onSelectionChange: (syntheticEvent) => {
                     const { nativeEvent } = syntheticEvent;
                     const { selection } = nativeEvent;
-                    console.log("onSelectionChange", selection);
                     setSelection(selection);
-                  }}}
+                }}}
 				query={{
-					key: 'AIzaSyB5OFOryVllEEk_FXbTpd_MY-dcAlB1dlI',
 					language: "en",
 					components: "country:ca",
-					location: `${region.latitude}, ${region.longitude}`
+                    location: `${region.latitude},${region.longitude}`,
+                    radius: 100000
 				}}
+                GooglePlacesDetailsQuery={{
+                    fields: 'address_component,adr_address,formatted_address,geometry,name'
+                }}
+                requestUrl={{
+                    url: 'https://us-central1-autoheredatabase.cloudfunctions.net/api/getPlaces',
+                    useOnPlatform: 'all'
+                }}
 				styles={{
-					container: { position: "absolute", top:5, width: "100%", zIndex: 1,},
+					container: { position: "absolute", top:5, width: "100%", zIndex: 1},
+                    row: {width: Dimensions.get('window').width},
 					listView: { backgroundColor: "white", marginTop: 0, borderRadius: 100},
-                    textInput: {paddingLeft: 20, paddingRight: 50, height:50, zIndex: 1, borderRadius: 100, marginRight: -20},
-                    textInputContainer: {display: 'flex', justifyContent: 'center', alignItems: 'flex-start', width: Dimensions.get('window').width - 20, left: 10}
+                    textInput: {paddingLeft: 20, paddingRight: 50, height:50, zIndex: 1, borderRadius: 100, marginRight: -25},
+                    textInputContainer: {display: 'flex', justifyContent: 'center', alignItems: 'center', width: Dimensions.get('window').width}
 				}}
 			/>
             <LocationSheet navigation={navigation}/>
@@ -124,13 +107,13 @@ export const AddLocationMap: React.FC<MapProps> = ({navigation, route}) => {
             showsUserLocation={true}
             showsMyLocationButton={false}
             showsTraffic={false}
-            onPress={(e) => {
+            onPress={async (e) => {
                 setInProgLocation({ ...inProgLocation, 
                     "Latitude" : e.nativeEvent.coordinate.latitude, 
                     "Longitude" : e.nativeEvent.coordinate.longitude})
                 setSheetOpen(true)
                 setIsCalculateDirections(true)
-                getDirections(`${userLocation.latitude}, ${userLocation.longitude}`,`${e.nativeEvent.coordinate.latitude}, ${e.nativeEvent.coordinate.longitude}`)
+                setDirections(await getDirections(`${userLocation.latitude}, ${userLocation.longitude}`,`${e.nativeEvent.coordinate.latitude}, ${e.nativeEvent.coordinate.longitude}`))
             }}
             onUserLocationChange={(e) => {
                 setUserLocation({
@@ -185,8 +168,8 @@ const styles = StyleSheet.create({
   },
   clearButton : {
     position: 'relative',
-    top: 15,
-    right: 20,
+    top: -2,
+    right: 22,
     zIndex: 2
   }
 });

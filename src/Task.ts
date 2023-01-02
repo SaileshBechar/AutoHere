@@ -4,6 +4,7 @@ import { SMSDict } from './Trips/TripProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import * as SMS from 'expo-sms';
+import Polyline from '@mapbox/polyline';
 
 const SENDER = "Sailesh"
 
@@ -23,8 +24,6 @@ export interface TaskManagerLocation {
 };
 
 export const GeoFenceTask = async <T extends TaskManagerGeoFence>({ data : {eventType, region}, error } : TaskManagerGeoFence) => {
-
-
     if (error) {
       // check `error.message` for more details.
       console.log("SendSMS Error Occurred")
@@ -73,9 +72,6 @@ export const GeoFenceTask = async <T extends TaskManagerGeoFence>({ data : {even
         console.log("Error reading TripDict")
         return {}
     }
-    
-
-    return true
 }
 
 export const sendSMS = async (phoneNumber : string, msg : string) => {
@@ -95,6 +91,29 @@ export const sendSMS = async (phoneNumber : string, msg : string) => {
         } catch (err) {
         console.log("SendSMS didnt work.");
         console.log(err);
+    }
+}
+
+export const getDirections = async (startLoc : string, destinationLoc : string) => {
+    try {
+        let resp = await fetch(`https://us-central1-autoheredatabase.cloudfunctions.net/api/getDirections/directions/json?origin=${ startLoc }&destination=${ destinationLoc }`)
+        let respJson = await resp.json();
+        let points = Polyline.decode(respJson.routes[0].overview_polyline.points);
+        let coords = points.map((point : number[], index : number) => {
+            return  {
+                latitude : point[0],
+                longitude : point[1]
+            }
+        })
+        
+        const duration = respJson.routes[0].legs.reduce((carry : number, curr : any) => {
+            return carry + (curr.duration_in_traffic ? curr.duration_in_traffic.value : curr.duration.value);
+        }, 0) / 60
+        console.log("ETA:", Math.round(duration), " mins")
+        return ({coords : coords, eta: Math.round(duration)})
+    } catch(error) {
+        alert(error)
+        return error
     }
 }
 

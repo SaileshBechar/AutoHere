@@ -10,7 +10,7 @@ import { SMSDict, TripContext } from './TripProvider';
 import { LocationRegion } from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import * as Notifications from 'expo-notifications';
-import { Notify, sendSMS } from '../Task';
+import { Notify, sendSMS, getDirections } from '../Task';
 
 const SENDER = "Sailesh"
 
@@ -58,7 +58,7 @@ export const StartTrip: React.FC<StartTripProps> = ({navigation, route}) => {
                 })
 
                 const latlngkey : string = stop.Location.Latitude.toString() + "_" + stop.Location.Longitude.toString()
-                stop.Contacts.map((contact, c_index) => {
+                stop.Contacts.map(async (contact, c_index) => {
                     c_index === 0 ? tripDict[latlngkey] = [{
                         ContactName : contact.Name, 
                         PhoneNumber : contact.PhoneNumber,
@@ -69,7 +69,8 @@ export const StartTrip: React.FC<StartTripProps> = ({navigation, route}) => {
                         PhoneNumber : contact.PhoneNumber,
                         LocationName : stop.Location.Name
                     }]
-                    const msg = SENDER + " is leaving now!"
+                    const directions = await getDirections(`${location.coords.latitude}, ${location.coords.longitude}`,`${stop.Location.Latitude.toString()}, ${stop.Location.Longitude.toString}`)
+                    const msg = `${SENDER} is leaving now and will arrive in ~${directions.duration} mins!`
                     console.log(contact.PhoneNumber, msg)
                     sendSMS(contact.PhoneNumber, msg)
                     Notify(msg)
